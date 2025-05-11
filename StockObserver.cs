@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 public interface IObserver
 {
     void Update(string stock, double price);
@@ -33,9 +36,37 @@ public class StockExchange : IStockNotifier
 public class User : IObserver
 {
     public string Name { get; }
+    public string WatchedStock { get; }
 
-    public User(string name) => Name = name;
+    public User(string name, string watchedStock)
+    {
+        Name = name;
+        WatchedStock = watchedStock;
+    }
 
     public void Update(string stock, double price)
-        => Console.WriteLine($"{Name} notified: {stock} is now {price}$");
+    {
+        if (stock == WatchedStock)
+        {
+            Console.WriteLine($"{Name} notified: {stock} is now {price}$");
+        }
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        StockExchange exchange = new();
+
+        User alice = new("Alice", "AAPL");
+        User bob = new("Bob", "GOOG");
+
+        exchange.Subscribe(alice);
+        exchange.Subscribe(bob);
+
+        exchange.UpdateStock("AAPL", 150.0); // Only Alice gets notified
+        exchange.UpdateStock("GOOG", 2800.5); // Only Bob gets notified
+        exchange.UpdateStock("TSLA", 720.3); // No one gets notified
+    }
 }
